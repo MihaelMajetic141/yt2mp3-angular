@@ -1,11 +1,14 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Client, IFrame, IMessage } from '@stomp/stompjs';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { environment } from '../../environment/environment';
+
 
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
-  private wsUrl = 'ws://localhost:8080/ws';
-  private stompClient: Client;
+  
+  private wsUrl = environment.wsUrl;
+  private client: Client;
   private connected = false;
 
   private progressSubject = new BehaviorSubject<number | null>(null);
@@ -19,44 +22,50 @@ export class WebSocketService {
   connected$ = this.connectedSubject.asObservable();
 
   constructor(private zone: NgZone) {
-    this.stompClient = new Client({
+    this.client = new Client({
       brokerURL: this.wsUrl,
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000
     });
 
-    this.stompClient.onConnect = (frame: IFrame) => {
+    this.client.onConnect = (frame: IFrame) => {
       this.connected = true;
       this.zone.run(() => this.connectedSubject.next(true));
       console.log('✅ Connection to WebSocket established', frame.headers);
 
-      const progressSub = this.stompClient.subscribe('/queue/progress', (message: IMessage) => {
-        let value: number | null = null;
-        try {
-          const body = JSON.parse(message.body);
-          value = typeof body === 'number' ? body : Number(body?.progress);
-        } catch {
-          value = Number(message.body);
+      const progressSub = this.client.subscribe(
+        '/queue/progress', (message: IMessage) => {
+          let value: number | null = null;
+          try {
+            const body = JSON.parse(message.body);
+            value = typeof body === 'number' ? body : Number(body?.progress);
+          } catch {
+            value = Number(message.body);
+          }
+          if (Number.isFinite(value)) {
+            this.zone.run(() => this.progressSubject.next(value as number));
+          }
         }
-        if (Number.isFinite(value)) {
-          this.zone.run(() => this.progressSubject.next(value as number));
+      );
+      console.log('Subscribed to progress queue with ID:', progressSub.id);
+
+      const errorSub = this.client.subscribe(
+        '/queue/error', (message: IMessage) => {
+          this.zone.run(() => this.errorSubject.next(message.body));
         }
-      });
-      console.log('📡 Subscribed to progress queue with ID:', progressSub.id);
+      );
+      console.log('Subscribed to error queue with ID:', errorSub.id);
 
-      const errorSub = this.stompClient.subscribe('/queue/error', (message: IMessage) => {
-        this.zone.run(() => this.errorSubject.next(message.body));
-      });
-      console.log('📡 Subscribed to error queue with ID:', errorSub.id);
-
-      const mp3Sub = this.stompClient.subscribe('/queue/mp3', (message: IMessage) => {
-        this.zone.run(() => this.downloadUrlSubject.next(message.body || null));
-      });
-      console.log('📡 Subscribed to mp3 queue with ID:', mp3Sub.id);
+      const mp3Sub = this.client.subscribe(
+        '/queue/mp3', (message: IMessage) => {
+          this.zone.run(() => this.downloadUrlSubject.next(message.body || null));
+        }
+      );
+      console.log('Subscribed to mp3 queue with ID:', mp3Sub.id);
     };
 
-    this.stompClient.onDisconnect = () => {
+    this.client.onDisconnect = () => {
       this.connected = false;
       this.zone.run(() => {
         this.connectedSubject.next(false);
@@ -65,22 +74,27 @@ export class WebSocketService {
   }
 
   connect() {
-    if (this.connected || this.stompClient.active) return;
+    if (this.connected || this.client.active) return;
     console.log('Attempting to connect to WebSocket...');
-    this.stompClient.activate();
+    this.client.activate();
   }
 
-  startConversion(ytUrl: string) {
-    if (!this.connected) {
+  startConversion(ytUrl: string, format: string) {
+        if (!this.connected) {
       console.error('WebSocket not connected');
       return;
     }
-    this.stompClient.publish({ destination: '/app/download', body: ytUrl });
+    if (format === 'mp3') {
+      this.client.publish({ 
+        destination: '/app/download', 
+        body: ytUrl 
+      });
+    }
   }
 
   disconnect() {
-    if (this.stompClient.active) {
-      this.stompClient.deactivate();
+    if (this.client.active) {
+      this.client.deactivate();
       this.connected = false;
       this.zone.run(() => this.connectedSubject.next(false));
     }

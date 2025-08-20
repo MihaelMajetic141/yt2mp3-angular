@@ -12,6 +12,7 @@ export class App implements OnInit {
   protected title = 'yt2mp3';
 
   private ws = inject(WebSocketService);
+  format: string = 'mp3';
 
   url = '';
   progress = toSignal(this.ws.progress$, { initialValue: null });
@@ -25,6 +26,6 @@ export class App implements OnInit {
 
   convert() {
     // this.ws.reset();
-    this.ws.startConversion(this.url);
+    this.ws.startConversion(this.url, this.format);
   }
 }
