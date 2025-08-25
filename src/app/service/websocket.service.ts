@@ -80,16 +80,15 @@ export class WebSocketService {
   }
 
   startConversion(ytUrl: string, format: string) {
-        if (!this.connected) {
+    if (!this.connected) {
       console.error('WebSocket not connected');
       return;
     }
-    if (format === 'mp3') {
-      this.client.publish({ 
+    this.client.publish({ 
         destination: '/app/download', 
         body: ytUrl 
       });
-    }
+    console.log(format)
   }
 
   disconnect() {

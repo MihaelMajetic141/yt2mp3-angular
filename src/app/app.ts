@@ -26,6 +26,7 @@ export class App implements OnInit {
 
   convert() {
     // this.ws.reset();
+    
     this.ws.startConversion(this.url, this.format);
   }
 }
