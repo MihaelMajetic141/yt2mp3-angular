@@ -1,0 +1,25 @@
+# Ignore everything
+*
+
+# Allow files and directories needed for the build
+!src
+!angular.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.app.json
+!tsconfig.spec.json
+!tslint.json
+!karma.conf.js
+!e2e
+!README.md
+
+# Ignore unnecessary files
+node_modules
+npm-debug.log
+yarn-error.log
+.git
+.gitignore
+.idea
+.vscode
+.DS_Store
