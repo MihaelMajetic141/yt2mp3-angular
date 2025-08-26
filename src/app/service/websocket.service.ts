@@ -1,7 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Client, IFrame, IMessage } from '@stomp/stompjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { environment } from '../../environment/environment';
+import { environment } from '../env/environment';
 
 
 @Injectable({ providedIn: 'root' })
