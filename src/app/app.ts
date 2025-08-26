@@ -12,13 +12,17 @@ export class App implements OnInit {
   protected title = 'yt2mp3';
 
   private ws = inject(WebSocketService);
-  format: string = 'mp3';
+  format: string = 'MP3';
 
   url = '';
-  progress = toSignal(this.ws.progress$, { initialValue: null });
-  error = toSignal(this.ws.error$, { initialValue: '' });
-  downloadUrl = toSignal(this.ws.downloadUrl$, { initialValue: null });
-  connected = toSignal(this.ws.connected$, { initialValue: false });
+  progress = toSignal(this.ws.progress$, { 
+    initialValue: null });
+  error = toSignal(this.ws.error$, { 
+    initialValue: '' });
+  downloadUrl = toSignal(this.ws.downloadUrl$, { 
+    initialValue: null });
+  connected = toSignal(this.ws.connected$, { 
+    initialValue: false });
 
   ngOnInit() {
     this.ws.connect();
@@ -26,7 +30,7 @@ export class App implements OnInit {
 
   convert() {
     // this.ws.reset();
-    
+    // ToDo: start animation
     this.ws.startConversion(this.url, this.format);
   }
 }

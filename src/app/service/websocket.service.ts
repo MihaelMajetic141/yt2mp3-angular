@@ -50,18 +50,20 @@ export class WebSocketService {
       );
       console.log('Subscribed to progress queue with ID:', progressSub.id);
 
-      const errorSub = this.client.subscribe(
-        '/queue/error', (message: IMessage) => {
-          this.zone.run(() => this.errorSubject.next(message.body));
-        }
-      );
+      const errorSub = this.client
+        .subscribe('/queue/error', (message: IMessage) => {
+          this.zone.run(
+            () => this.errorSubject.next(message.body)
+          );
+        });
       console.log('Subscribed to error queue with ID:', errorSub.id);
 
-      const mp3Sub = this.client.subscribe(
-        '/queue/mp3', (message: IMessage) => {
-          this.zone.run(() => this.downloadUrlSubject.next(message.body || null));
-        }
-      );
+      const mp3Sub = this.client
+        .subscribe('/queue/mp3', (message: IMessage) => {
+          this.zone.run(
+            () => this.downloadUrlSubject.next(message.body || null)
+          );
+        });
       console.log('Subscribed to mp3 queue with ID:', mp3Sub.id);
     };
 
@@ -84,11 +86,11 @@ export class WebSocketService {
       console.error('WebSocket not connected');
       return;
     }
+    console.log(format)
     this.client.publish({ 
         destination: '/app/download', 
         body: ytUrl 
-      });
-    console.log(format)
+    });
   }
 
   disconnect() {
