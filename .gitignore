@@ -37,3 +37,5 @@ yarn-error.log*
 /tmp
 /app/dist
 /e2e/dist
+
+/.angular/cache

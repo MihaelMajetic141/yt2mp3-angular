@@ -11,11 +11,15 @@ export class WebSocketService {
   private client: Client;
   private connected = false;
 
+  private videoIdSubject = new BehaviorSubject<string | null>(null);
+  private titleSubject = new BehaviorSubject<string | null>(null);
   private progressSubject = new BehaviorSubject<number | null>(null);
   private errorSubject = new Subject<string>();
   private downloadUrlSubject = new BehaviorSubject<string | null>(null);
   private connectedSubject = new BehaviorSubject<boolean>(false);
 
+  videoId$ = this.videoIdSubject.asObservable();
+  title$ = this.titleSubject.asObservable();
   progress$ = this.progressSubject.asObservable();
   error$ = this.errorSubject.asObservable();
   downloadUrl$ = this.downloadUrlSubject.asObservable();
@@ -34,7 +38,25 @@ export class WebSocketService {
       this.zone.run(() => this.connectedSubject.next(true));
       console.log('✅ Connection to WebSocket established', frame.headers);
 
-      const progressSub = this.client.subscribe(
+      const videoIdSubject = this.client.subscribe(
+        '/queue/videoId', (message: IMessage) => {
+          this.zone.run(
+            () => this.videoIdSubject.next(message.body || null)
+          );
+        }
+      )
+      console.log('Subscribed to videoId queue with ID:', videoIdSubject.id);
+
+      const titleSubject = this.client.subscribe(
+        '/queue/title', (message: IMessage) => {
+          this.zone.run(
+            () => this.titleSubject.next(message.body || null)
+          );
+        }
+      )
+      console.log('Subscribed to title queue with ID:', titleSubject.id);
+
+      const progressSubject = this.client.subscribe(
         '/queue/progress', (message: IMessage) => {
           let value: number | null = null;
           try {
@@ -48,23 +70,23 @@ export class WebSocketService {
           }
         }
       );
-      console.log('Subscribed to progress queue with ID:', progressSub.id);
+      console.log('Subscribed to progress queue with ID:', progressSubject.id);
 
-      const errorSub = this.client
+      const errorSubject = this.client
         .subscribe('/queue/error', (message: IMessage) => {
           this.zone.run(
             () => this.errorSubject.next(message.body)
           );
         });
-      console.log('Subscribed to error queue with ID:', errorSub.id);
+      console.log('Subscribed to error queue with ID:', errorSubject.id);
 
-      const mp3Sub = this.client
+      const downloadLinkSubject = this.client
         .subscribe('/queue/mp3', (message: IMessage) => {
           this.zone.run(
             () => this.downloadUrlSubject.next(message.body || null)
           );
         });
-      console.log('Subscribed to mp3 queue with ID:', mp3Sub.id);
+      console.log('Subscribed to mp3 queue with ID:', downloadLinkSubject.id);
     };
 
     this.client.onDisconnect = () => {
@@ -86,9 +108,9 @@ export class WebSocketService {
       console.error('WebSocket not connected');
       return;
     }
-    console.log(format)
+    this.resetSubjects()
     this.client.publish({ 
-        destination: '/app/download', 
+        destination: '/app/convert', 
         body: ytUrl 
     });
   }
@@ -99,5 +121,13 @@ export class WebSocketService {
       this.connected = false;
       this.zone.run(() => this.connectedSubject.next(false));
     }
+  }
+
+  resetSubjects() {
+    this.videoIdSubject.next(null)
+    this.titleSubject.next(null)
+    this.progressSubject.next(null)
+    this.errorSubject.next("")
+    this.downloadUrlSubject.next(null)
   }
 }

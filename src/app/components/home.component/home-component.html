@@ -1,0 +1,115 @@
+<div class="main-content">
+  <h1 class="content-header">Convert YouTube Videos</h1>
+  <h3 class="content-subheader">Fast, free, and easy conversion to MP3 audio or MP4 video formats.</h3>
+
+  <div class="converter-form">
+    <label>YouTube URL</label>
+    <div class="input-wrapper">
+      <input 
+        type="text" 
+        placeholder="https://www.youtube.com/watch?v=..." 
+        class="url-input" 
+        [(ngModel)]="url">
+      <mat-icon class="arrow-icon">play_arrow</mat-icon>
+    </div>
+
+    <label>Output Format</label>
+    <div class="select-wrapper">
+      <select [(ngModel)]="format">
+        <option value="MP3">MP3</option>
+        <option value="MP4">MP4</option>
+      </select>
+      @if(format === "MP3") {
+      <mat-icon class="select-icon">audio_file</mat-icon>
+      } @else {
+      <mat-icon class="select-icon">video_file</mat-icon>
+      }
+    </div>
+
+    <button 
+      class="convert-button" 
+      [class.loading]="isLoading" 
+      (click)="convert()"
+      [disabled]="!connected() || isLoading"
+    >
+      @if(isLoading) {
+      <div class="spinner"></div>
+      Converting...
+      } @else {
+      Convert to {{ format.toUpperCase() }}
+      @if(format === "MP3") {
+      <mat-icon class="icon-no-fill">music_note</mat-icon>
+      } @else {
+      <mat-icon class="icon-no-fill">videocam</mat-icon>
+      }
+      }
+    </button>
+
+    @if(title() !== null && videoId() !== null) {
+    <div class="video-card fade-in">
+      <!-- <mat-icon class="title-icon">video_library</mat-icon> -->
+      <div class="thumbnail-container fade-in">
+        <div class="thumbnail">
+          <img src="https://img.youtube.com/vi/{{videoId()}}/mqdefault.jpg" alt="Video thumbnail">
+          @if(isLoading) {
+          <div class="thumbnail-overlay">
+            <div class="pulse-animation"></div>
+          </div>
+          }
+        </div>
+      </div>
+      <div class="column-container">
+        <div class="video-title">
+          {{title()}}
+        </div>
+        @if (progress() !== null) {
+        <div class="progress-container fade-in">
+          <div class="progress-wrapper">
+            <mat-icon class="progress-icon" [class.rotating]="progress() !== 100">hourglass_empty</mat-icon>
+            <progress class="progress-bar" [value]="progress()" max="100"></progress>
+            <!-- <div class="progress-glow" [style.width.%]="progress()"></div> -->
+          </div>
+        </div>
+        <div class="progress-header">
+          <p class="progress-text">{{ progress() }}%</p>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    @if (error()) {
+    <div class="error-message fade-in">
+      <mat-icon class="error-icon">error</mat-icon>
+      Error: {{ error() }}
+    </div>
+    }
+
+    @if (downloadUrl()) {
+    <div class="download-container fade-in">
+      <button class="download-button success-pulse" (click)="onDownloadClick(downloadUrl()!)">
+        <mat-icon class="download-icon">download</mat-icon>
+        Download {{ format.toUpperCase() }}
+      </button>
+    </div>
+    }
+  </div>
+</div>
+
+<div class="features">
+  <div class="feature">
+    <mat-icon class="feature-icon">music_note</mat-icon>
+    <h3>High Quality Audio</h3>
+    <p>Convert to MP3s with crystal clear audio quality up to 320kbps</p>
+  </div>
+  <div class="feature">
+    <mat-icon class="feature-icon">video_file</mat-icon>
+    <h3>HD Video</h3>
+    <p>Download videos in multiple resolutions including 1080p HD</p>
+  </div>
+  <div class="feature">
+    <mat-icon class="feature-icon">download</mat-icon>
+    <h3>Fast & Free</h3>
+    <p>Lightning-fast conversions with no registration required</p>
+  </div>
+</div>

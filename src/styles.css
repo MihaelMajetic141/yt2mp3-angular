@@ -1,1 +1,9 @@
-/* You can add global styles to this file, and also import other style files */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('./assets/fonts/inter_5.2.6/ttf/inter-cyrillic-500-normal.ttf') format('truetype');
+}
