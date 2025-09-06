@@ -1,5 +1,5 @@
-import { Component, OnInit, effect, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { WebSocketService } from '../../service/websocket.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -15,7 +15,7 @@ export class HomeComponent implements OnInit {
   ws: WebSocketService = inject(WebSocketService)
 
   url = '';
-  isLoading = false
+  isLoading = signal(false);
   videoId = toSignal(this.ws.videoId$, {
     initialValue: null
   });
@@ -40,6 +40,9 @@ export class HomeComponent implements OnInit {
       if (this.downloadUrl()) {
         this.toggleLoading();
       }
+      if (this.error()) {
+        this.isLoading.set(false);
+      }
     });
   }
 
@@ -48,23 +51,41 @@ export class HomeComponent implements OnInit {
   }
 
   convert() {
-    // this.ws.reset();
+    if (!this.url?.trim()) {
+      this.ws.emitError('URL cannot be empty');
+      return;
+    }
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=)?[a-zA-Z0-9_-]{11}.*$/;
+    if (!youtubeRegex.test(this.url)) {
+      this.ws.emitError('Invalid YouTube URL');
+      return;
+    }
     this.toggleLoading()
     this.ws.startConversion(this.url, this.format)
   }
 
   onDownloadClick(url: string) {
-    this.http.get(url, { responseType: 'blob' }).subscribe(blob => {
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `${this.title()}.${this.format.toLowerCase()}`;
-      a.click();
-      URL.revokeObjectURL(blobUrl);
-    });
+    this.http.get(url, { responseType: 'blob' })
+      .subscribe({
+        next: (blob) => {
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = `${this.title()}.${this.format.toLowerCase()}`;
+          a.click();
+          URL.revokeObjectURL(blobUrl);
+        },
+        error: (err: HttpErrorResponse) => {
+          let errorMessage = 'An error occurred during download';
+          if (err.status === 404) {
+            errorMessage = 'Invalid or expired download ID';
+          }
+          this.ws.emitError(errorMessage);
+        }
+      });
   }
 
   toggleLoading() {
-    this.isLoading = !this.isLoading
+    this.isLoading.update(value => !value);
   }
 }

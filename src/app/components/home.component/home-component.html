@@ -5,11 +5,7 @@
   <div class="converter-form">
     <label>YouTube URL</label>
     <div class="input-wrapper">
-      <input 
-        type="text" 
-        placeholder="https://www.youtube.com/watch?v=..." 
-        class="url-input" 
-        [(ngModel)]="url">
+      <input type="text" placeholder="https://www.youtube.com/watch?v=..." class="url-input" [(ngModel)]="url">
       <mat-icon class="arrow-icon">play_arrow</mat-icon>
     </div>
 
@@ -26,13 +22,9 @@
       }
     </div>
 
-    <button 
-      class="convert-button" 
-      [class.loading]="isLoading" 
-      (click)="convert()"
-      [disabled]="!connected() || isLoading"
-    >
-      @if(isLoading) {
+    <button class="convert-button" [class.loading]="isLoading()" (click)="convert()"
+      [disabled]="!connected() || isLoading()">
+      @if(isLoading()) {
       <div class="spinner"></div>
       Converting...
       } @else {
@@ -51,37 +43,33 @@
       <div class="thumbnail-container fade-in">
         <div class="thumbnail">
           <img src="https://img.youtube.com/vi/{{videoId()}}/mqdefault.jpg" alt="Video thumbnail">
-          @if(isLoading) {
-          <div class="thumbnail-overlay">
-            <div class="pulse-animation"></div>
-          </div>
-          }
+          <!-- @if(isLoading()) {
+              <div class="thumbnail-overlay">
+                <div class="pulse-animation"></div>
+              </div>
+            } -->
         </div>
       </div>
       <div class="column-container">
         <div class="video-title">
-          {{title()}}
+          <p>{{title()}}</p>
         </div>
         @if (progress() !== null) {
         <div class="progress-container fade-in">
           <div class="progress-wrapper">
-            <mat-icon class="progress-icon" [class.rotating]="progress() !== 100">hourglass_empty</mat-icon>
-            <progress class="progress-bar" [value]="progress()" max="100"></progress>
-            <!-- <div class="progress-glow" [style.width.%]="progress()"></div> -->
+            <div class="progress-header">
+              <mat-icon class="progress-icon" [class.rotating]="progress() !== 100">
+                hourglass_empty
+              </mat-icon>
+              <progress class="progress-bar" [value]="progress()" max="100"></progress>
+              <!-- <div class="progress-glow" [style.width.%]="progress()"></div> -->
+
+            </div>
+            <p class="progress-text">{{ progress() }}%</p>
           </div>
-        </div>
-        <div class="progress-header">
-          <p class="progress-text">{{ progress() }}%</p>
         </div>
         }
       </div>
-    </div>
-    }
-
-    @if (error()) {
-    <div class="error-message fade-in">
-      <mat-icon class="error-icon">error</mat-icon>
-      Error: {{ error() }}
     </div>
     }
 
@@ -91,6 +79,13 @@
         <mat-icon class="download-icon">download</mat-icon>
         Download {{ format.toUpperCase() }}
       </button>
+    </div>
+    }
+
+        @if (error()) {
+    <div class="error-message fade-in">
+      <mat-icon class="error-icon">error</mat-icon>
+      Error: {{ error() }}
     </div>
     }
   </div>

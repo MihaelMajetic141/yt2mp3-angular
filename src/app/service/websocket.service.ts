@@ -6,7 +6,7 @@ import { environment } from '../env/environment';
 
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
-  
+
   private wsUrl = environment.wsUrl;
   private client: Client;
   private connected = false;
@@ -39,7 +39,7 @@ export class WebSocketService {
       console.log('✅ Connection to WebSocket established', frame.headers);
 
       const videoIdSubject = this.client.subscribe(
-        '/queue/videoId', (message: IMessage) => {
+        '/user/queue/videoId', (message: IMessage) => {
           this.zone.run(
             () => this.videoIdSubject.next(message.body || null)
           );
@@ -48,7 +48,7 @@ export class WebSocketService {
       console.log('Subscribed to videoId queue with ID:', videoIdSubject.id);
 
       const titleSubject = this.client.subscribe(
-        '/queue/title', (message: IMessage) => {
+        '/user/queue/title', (message: IMessage) => {
           this.zone.run(
             () => this.titleSubject.next(message.body || null)
           );
@@ -57,7 +57,7 @@ export class WebSocketService {
       console.log('Subscribed to title queue with ID:', titleSubject.id);
 
       const progressSubject = this.client.subscribe(
-        '/queue/progress', (message: IMessage) => {
+        '/user/queue/progress', (message: IMessage) => {
           let value: number | null = null;
           try {
             const body = JSON.parse(message.body);
@@ -73,7 +73,7 @@ export class WebSocketService {
       console.log('Subscribed to progress queue with ID:', progressSubject.id);
 
       const errorSubject = this.client
-        .subscribe('/queue/error', (message: IMessage) => {
+        .subscribe('/user/queue/error', (message: IMessage) => {
           this.zone.run(
             () => this.errorSubject.next(message.body)
           );
@@ -81,12 +81,12 @@ export class WebSocketService {
       console.log('Subscribed to error queue with ID:', errorSubject.id);
 
       const downloadLinkSubject = this.client
-        .subscribe('/queue/mp3', (message: IMessage) => {
+        .subscribe('/user/queue/download', (message: IMessage) => {
           this.zone.run(
             () => this.downloadUrlSubject.next(message.body || null)
           );
         });
-      console.log('Subscribed to mp3 queue with ID:', downloadLinkSubject.id);
+      console.log('Subscribed to download queue with ID:', downloadLinkSubject.id);
     };
 
     this.client.onDisconnect = () => {
@@ -109,10 +109,17 @@ export class WebSocketService {
       return;
     }
     this.resetSubjects()
-    this.client.publish({ 
-        destination: '/app/convert', 
-        body: ytUrl 
-    });
+    if (format.toLowerCase() === "mp3") {
+      this.client.publish({
+        destination: '/app/convertToMp3',
+        body: ytUrl
+      });
+    } else {
+      this.client.publish({
+        destination: '/app/convertToMp4',
+        body: ytUrl
+      });
+    }
   }
 
   disconnect() {
@@ -129,5 +136,9 @@ export class WebSocketService {
     this.progressSubject.next(null)
     this.errorSubject.next("")
     this.downloadUrlSubject.next(null)
+  }
+
+  public emitError(error: string): void {
+    this.errorSubject.next(error);
   }
 }

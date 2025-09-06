@@ -7,5 +7,7 @@ import { Component } from '@angular/core';
   styleUrl: './header-component.css'
 })
 export class HeaderComponent {
-  
+  toggleTheme() {
+    document.body.classList.toggle('dark-theme');
+  }
 }

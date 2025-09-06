@@ -4,13 +4,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f0f7fd;
+  background-color: var(--card-color);
 }
 
 .logo {
   font-size: 24px;
   font-weight: bolder;
-  color: #000000;
+  color: var(--text-color);;
   display: flex;
   align-items: center;
   margin-left: 50px;
@@ -23,7 +23,7 @@
   width: 24px;
   height: 24px;
   border-radius: 5px;
-  background-color: #009648;
+  background-color: var(--accent-color);;
   color: #fff;
   margin-right: 8px;
   font-size: 16px;
@@ -35,27 +35,41 @@
 
 .header-nav nav {
   display: flex;
+  align-items: center;
   gap: 24px;
 }
 
 .header-nav a {
   text-decoration: none;
-  color: #333;
+  color: var(--text-color);;
   font-weight: bold;
   padding: 8px 12px;
   border-radius: 4px;
   transition: all 0.2s ease;
 }
 
+.header-nav mat-icon {
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  color: var(--accent-color);
+  background-color: var(--card-color);
+}
+
+.header-nav mat-icon:hover {
+  background-color: rgba(0, 150, 72, 0.1);
+  color: var(--accent-color);
+}
+
 .header-nav a:hover {
   background-color: rgba(0, 150, 72, 0.1);
-  color: #009648;
+  color: var(--accent-color);
 }
 
 .header-divider {
   border: none;
   height: 1px;
-  background-color: #e0e0e0;
+  background-color: var(--accent-color);
   margin: 0;
 }
 

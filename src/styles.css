@@ -1,9 +1,30 @@
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  height: 100%;
+  width: 100%;
 }
 
 @font-face {
-    font-family: 'Inter';
-    src: url('./assets/fonts/inter_5.2.6/ttf/inter-cyrillic-500-normal.ttf') format('truetype');
+  font-family: 'Inter';
+  src: url('./assets/fonts/inter_5.2.6/ttf/inter-latin-500-normal.ttf') format('truetype');
+}
+
+:root {
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --light-text-color: #555555;
+  --accent-color: #009648;
+  --card-color: #f0f7fd;
+}
+
+.dark-theme {
+  --background-color: #000000;
+  --text-color: #ededed;
+  --light-text-color: #a3a3a3;
+  --accent-color: #009648;
+  --card-color: #1f1f1f;
 }
